@@ -5,18 +5,20 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
+import { View, Text } from 'react-native';
 
 import { AppProvider } from './src/context/AppContext';
-import { colors } from './src/utils/theme';
+import { colors, fonts } from './src/utils/theme';
 
-import DashboardScreen from './src/screens/DashboardScreen';
-import HivesScreen from './src/screens/HivesScreen';
-import AddHiveScreen from './src/screens/AddHiveScreen';
+import HomeScreen from './src/screens/HomeScreen';
+import ApiaryScreen from './src/screens/ApiaryScreen';
+import ApiaryDetailScreen from './src/screens/ApiaryDetailScreen';
 import HiveDetailScreen from './src/screens/HiveDetailScreen';
-import InspectionsScreen from './src/screens/InspectionsScreen';
-import AddInspectionScreen from './src/screens/AddInspectionScreen';
-import HarvestsScreen from './src/screens/HarvestsScreen';
+import QuickInspectionScreen from './src/screens/QuickInspectionScreen';
+import DetailedInspectionScreen from './src/screens/DetailedInspectionScreen';
 import AddHarvestScreen from './src/screens/AddHarvestScreen';
+import ForageScreen from './src/screens/ForageScreen';
+import DataScreen from './src/screens/DataScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -33,47 +35,71 @@ const navTheme = {
 };
 
 const stackOptions = {
-  headerStyle: { backgroundColor: colors.surface },
+  headerStyle: {
+    backgroundColor: colors.surface,
+    shadowColor: '#2C1810',
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+  },
   headerTintColor: colors.primary,
-  headerTitleStyle: { fontWeight: '700', color: colors.text },
+  headerTitleStyle: {
+    fontWeight: '800',
+    color: colors.text,
+    fontSize: fonts.sizes.lg,
+  },
+  headerBackTitleVisible: false,
 };
 
-function HivesStack() {
+function HomeStack() {
   return (
     <Stack.Navigator screenOptions={stackOptions}>
-      <Stack.Screen name="HivesList" component={HivesScreen} options={{ title: 'My Hives' }} />
-      <Stack.Screen name="AddHive" component={AddHiveScreen} options={{ title: 'Add Hive' }} />
-      <Stack.Screen name="EditHive" component={AddHiveScreen} options={{ title: 'Edit Hive' }} />
-      <Stack.Screen name="HiveDetail" component={HiveDetailScreen} options={{ title: 'Hive Detail' }} />
-      <Stack.Screen name="AddInspection" component={AddInspectionScreen} options={{ title: 'New Inspection' }} />
+      <Stack.Screen
+        name="HomeMain"
+        component={HomeScreen}
+        options={{ title: '🐝 Randolph Bees', headerLargeTitle: false }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+function ApiaryStack() {
+  return (
+    <Stack.Navigator screenOptions={stackOptions}>
+      <Stack.Screen name="ApiaryList" component={ApiaryScreen} options={{ title: 'Apiaries' }} />
+      <Stack.Screen name="ApiaryDetail" component={ApiaryDetailScreen} options={({ route }) => ({ title: 'Apiary' })} />
+      <Stack.Screen name="HiveDetail" component={HiveDetailScreen} options={({ route }) => ({ title: 'Hive Details' })} />
+      <Stack.Screen name="QuickInspection" component={QuickInspectionScreen} options={{ title: 'Quick Check' }} />
+      <Stack.Screen name="DetailedInspection" component={DetailedInspectionScreen} options={{ title: 'Full Inspection' }} />
       <Stack.Screen name="AddHarvest" component={AddHarvestScreen} options={{ title: 'Record Harvest' }} />
     </Stack.Navigator>
   );
 }
 
-function DashboardStack() {
+function ForageStack() {
   return (
     <Stack.Navigator screenOptions={stackOptions}>
-      <Stack.Screen name="DashboardMain" component={DashboardScreen} options={{ title: '🐝 BeeKeeper' }} />
-      <Stack.Screen name="AddHive" component={AddHiveScreen} options={{ title: 'Add Hive' }} />
+      <Stack.Screen name="ForageMain" component={ForageScreen} options={{ title: 'Forage' }} />
     </Stack.Navigator>
   );
 }
 
-function InspectionsStack() {
+function DataStack() {
   return (
     <Stack.Navigator screenOptions={stackOptions}>
-      <Stack.Screen name="InspectionsList" component={InspectionsScreen} options={{ title: 'Inspections' }} />
+      <Stack.Screen name="DataMain" component={DataScreen} options={{ title: 'Data & Trends' }} />
     </Stack.Navigator>
   );
 }
 
-function HarvestsStack() {
-  return (
-    <Stack.Navigator screenOptions={stackOptions}>
-      <Stack.Screen name="HarvestsList" component={HarvestsScreen} options={{ title: 'Harvests' }} />
-    </Stack.Navigator>
-  );
+function TabIcon({ name, focused, color, size }) {
+  const iconMap = {
+    Home: focused ? 'home' : 'home-outline',
+    Apiary: focused ? 'layers' : 'layers-outline',
+    Forage: focused ? 'leaf' : 'leaf-outline',
+    Data: focused ? 'bar-chart' : 'bar-chart-outline',
+  };
+  return <Ionicons name={iconMap[name]} size={size} color={color} />;
 }
 
 export default function App() {
@@ -84,30 +110,29 @@ export default function App() {
         <Tab.Navigator
           screenOptions={({ route }) => ({
             headerShown: false,
-            tabBarActiveTintColor: colors.primary,
-            tabBarInactiveTintColor: colors.textLight,
+            tabBarActiveTintColor: colors.tabActive,
+            tabBarInactiveTintColor: colors.tabInactive,
             tabBarStyle: {
-              backgroundColor: colors.surface,
+              backgroundColor: colors.tabBar,
               borderTopColor: colors.border,
-              paddingBottom: 4,
-              height: 60,
+              borderTopWidth: 1,
+              paddingBottom: 6,
+              paddingTop: 4,
+              height: 62,
             },
-            tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
-            tabBarIcon: ({ focused, color, size }) => {
-              const icons = {
-                Dashboard: focused ? 'home' : 'home-outline',
-                Hives: focused ? 'layers' : 'layers-outline',
-                Inspections: focused ? 'clipboard' : 'clipboard-outline',
-                Harvests: focused ? 'water' : 'water-outline',
-              };
-              return <Ionicons name={icons[route.name]} size={size} color={color} />;
+            tabBarLabelStyle: {
+              fontSize: fonts.sizes.xs,
+              fontWeight: '700',
             },
+            tabBarIcon: ({ focused, color, size }) => (
+              <TabIcon name={route.name} focused={focused} color={color} size={size} />
+            ),
           })}
         >
-          <Tab.Screen name="Dashboard" component={DashboardStack} />
-          <Tab.Screen name="Hives" component={HivesStack} />
-          <Tab.Screen name="Inspections" component={InspectionsStack} />
-          <Tab.Screen name="Harvests" component={HarvestsStack} />
+          <Tab.Screen name="Home" component={HomeStack} options={{ tabBarLabel: 'Home' }} />
+          <Tab.Screen name="Apiary" component={ApiaryStack} options={{ tabBarLabel: 'Apiary' }} />
+          <Tab.Screen name="Forage" component={ForageStack} options={{ tabBarLabel: 'Forage' }} />
+          <Tab.Screen name="Data" component={DataStack} options={{ tabBarLabel: 'Data' }} />
         </Tab.Navigator>
       </NavigationContainer>
     </AppProvider>

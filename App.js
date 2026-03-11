@@ -1,5 +1,6 @@
 import 'react-native-gesture-handler';
 import React from 'react';
+import { Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -101,7 +102,7 @@ export default function App() {
   return (
     <AppProvider>
       <NavigationContainer>
-        <StatusBar style="light" />
+        {Platform.OS !== 'web' && <StatusBar style="light" />}
         <Tab.Navigator
           screenOptions={({ route }) => ({
             headerShown: false,

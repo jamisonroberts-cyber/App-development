@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TextInput, ScrollView, TouchableOpacity,
-  StyleSheet, Switch, ActivityIndicator, Alert,
+  StyleSheet, Switch, ActivityIndicator, Alert, Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
@@ -50,6 +50,10 @@ export default function AddInspectionScreen({ navigation, route }) {
   }, []);
 
   async function startRecording() {
+    if (Platform.OS === 'web') {
+      Alert.alert('Voice Recording', 'Voice recording is not available on web. Type your observations in the text field below, or use your keyboard\'s built-in microphone/dictation feature.');
+      return;
+    }
     try {
       const { granted } = await Audio.requestPermissionsAsync();
       if (!granted) {
@@ -70,7 +74,7 @@ export default function AddInspectionScreen({ navigation, route }) {
   }
 
   async function stopRecording() {
-    if (!recordingObj) return;
+    if (Platform.OS === 'web' || !recordingObj) return;
     clearInterval(timerRef.current);
     setIsRecording(false);
     try {
@@ -159,7 +163,7 @@ export default function AddInspectionScreen({ navigation, route }) {
             {isRecording ? (
               <Text style={styles.micTimer}>{formatTime(recordingSeconds)}</Text>
             ) : (
-              <Text style={styles.micHint}>Or use iOS keyboard mic to dictate</Text>
+              <Text style={styles.micHint}>{Platform.OS === 'web' ? 'Type below or use keyboard dictation' : 'Or use iOS keyboard mic to dictate'}</Text>
             )}
           </View>
         </View>

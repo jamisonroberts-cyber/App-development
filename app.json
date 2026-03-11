@@ -11,6 +11,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#FFF8EC"
     },
+    "plugins": [
+      ["expo-av", { "microphonePermission": "Allow BeeKeeper to record voice inspections." }]
+    ],
     "ios": {
       "supportsTablet": true
     },
@@ -20,11 +23,11 @@
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
-      }
+      },
+      "permissions": ["RECORD_AUDIO"]
     },
     "web": {
-      "favicon": "./assets/favicon.png",
-      "bundler": "metro"
+      "favicon": "./assets/favicon.png"
     }
   }
 }

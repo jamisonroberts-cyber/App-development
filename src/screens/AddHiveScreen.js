@@ -7,8 +7,9 @@ const HIVE_TYPES = ['Langstroth', 'Top Bar', 'Warré', 'Flow Hive', 'Other'];
 const HEALTH_OPTIONS = ['Excellent', 'Good', 'Fair', 'Poor'];
 
 export default function AddHiveScreen({ navigation, route }) {
-  const { addHive, updateHive, hives } = useApp();
+  const { addHive, updateHive, hives, apiaries } = useApp();
   const editingId = route.params?.hiveId;
+  const presetApiaryId = route.params?.apiaryId;
   const isEditing = !!editingId;
 
   const [name, setName] = useState('');
@@ -18,6 +19,7 @@ export default function AddHiveScreen({ navigation, route }) {
   const [established, setEstablished] = useState('');
   const [notes, setNotes] = useState('');
   const [queenYear, setQueenYear] = useState('');
+  const [apiaryId, setApiaryId] = useState(presetApiaryId || null);
 
   useEffect(() => {
     if (isEditing) {
@@ -30,6 +32,7 @@ export default function AddHiveScreen({ navigation, route }) {
         setEstablished(hive.established || '');
         setNotes(hive.notes || '');
         setQueenYear(hive.queenYear || '');
+        setApiaryId(hive.apiaryId || null);
       }
     }
   }, []);
@@ -39,7 +42,7 @@ export default function AddHiveScreen({ navigation, route }) {
       Alert.alert('Required', 'Please enter a hive name.');
       return;
     }
-    const data = { name: name.trim(), type, health, location, established, notes, queenYear };
+    const data = { name: name.trim(), type, health, location, established, notes, queenYear, apiaryId };
     if (isEditing) {
       updateHive(editingId, data);
     } else {
@@ -91,6 +94,29 @@ export default function AddHiveScreen({ navigation, route }) {
       <Field label="Queen Year">
         <TextInput style={styles.input} value={queenYear} onChangeText={setQueenYear} placeholder="e.g. 2025" placeholderTextColor={colors.border} keyboardType="numeric" maxLength={4} />
       </Field>
+
+      {/* Apiary assignment — only show picker if there are multiple apiaries and no preset */}
+      {apiaries.length > 0 && !presetApiaryId && (
+        <Field label="Apiary">
+          <View style={styles.chipRow}>
+            <TouchableOpacity
+              style={[styles.chip, !apiaryId && styles.chipSelected]}
+              onPress={() => setApiaryId(null)}
+            >
+              <Text style={[styles.chipText, !apiaryId && styles.chipTextSelected]}>Unassigned</Text>
+            </TouchableOpacity>
+            {apiaries.map(a => (
+              <TouchableOpacity
+                key={a.id}
+                style={[styles.chip, apiaryId === a.id && styles.chipSelected]}
+                onPress={() => setApiaryId(a.id)}
+              >
+                <Text style={[styles.chipText, apiaryId === a.id && styles.chipTextSelected]}>{a.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </Field>
+      )}
 
       <Field label="Notes">
         <TextInput

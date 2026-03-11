@@ -1,86 +1,108 @@
 import 'react-native-gesture-handler';
 import React from 'react';
+import { Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 
 import { AppProvider } from './src/context/AppContext';
-import { colors } from './src/utils/theme';
+import { colors, fonts } from './src/utils/theme';
 
-import DashboardScreen from './src/screens/DashboardScreen';
-import HivesScreen from './src/screens/HivesScreen';
+// Screens
+import HomeScreen from './src/screens/HomeScreen';
+import ApiaryListScreen from './src/screens/ApiaryListScreen';
+import AddApiaryScreen from './src/screens/AddApiaryScreen';
+import ApiaryDetailScreen from './src/screens/ApiaryDetailScreen';
 import AddHiveScreen from './src/screens/AddHiveScreen';
 import HiveDetailScreen from './src/screens/HiveDetailScreen';
-import InspectionsScreen from './src/screens/InspectionsScreen';
 import AddInspectionScreen from './src/screens/AddInspectionScreen';
-import HarvestsScreen from './src/screens/HarvestsScreen';
 import AddHarvestScreen from './src/screens/AddHarvestScreen';
+import HiveInventoryScreen from './src/screens/HiveInventoryScreen';
+import FloraScreen from './src/screens/FloraScreen';
+import DataScreen from './src/screens/DataScreen';
+import InventoryScreen from './src/screens/InventoryScreen';
+import AddInventoryItemScreen from './src/screens/AddInventoryItemScreen';
+import FinancialScreen from './src/screens/FinancialScreen';
+import AddFinancialRecordScreen from './src/screens/AddFinancialRecordScreen';
 
 const Tab = createBottomTabNavigator();
-const Stack = createStackNavigator();
-
-const navTheme = {
-  colors: {
-    primary: colors.primary,
-    background: colors.background,
-    card: colors.surface,
-    text: colors.text,
-    border: colors.border,
-    notification: colors.primary,
-  },
-};
+const Stack = createNativeStackNavigator();
 
 const stackOptions = {
-  headerStyle: { backgroundColor: colors.surface },
-  headerTintColor: colors.primary,
-  headerTitleStyle: { fontWeight: '700', color: colors.text },
+  headerStyle: { backgroundColor: colors.primary },
+  headerTintColor: '#fff',
+  headerTitleStyle: { fontWeight: '600', fontSize: fonts.sizes.lg },
+  headerBackTitleVisible: false,
 };
 
-function HivesStack() {
+function HomeStack() {
   return (
     <Stack.Navigator screenOptions={stackOptions}>
-      <Stack.Screen name="HivesList" component={HivesScreen} options={{ title: 'My Hives' }} />
+      <Stack.Screen name="HomeMain" component={HomeScreen} options={{ title: 'BeeKeeper' }} />
+    </Stack.Navigator>
+  );
+}
+
+function ApiaryStack() {
+  return (
+    <Stack.Navigator screenOptions={stackOptions}>
+      <Stack.Screen name="ApiaryList" component={ApiaryListScreen} options={{ title: 'My Apiaries' }} />
+      <Stack.Screen name="AddApiary" component={AddApiaryScreen} options={{ title: 'Add Apiary' }} />
+      <Stack.Screen name="EditApiary" component={AddApiaryScreen} options={{ title: 'Edit Apiary' }} />
+      <Stack.Screen name="ApiaryDetail" component={ApiaryDetailScreen} />
       <Stack.Screen name="AddHive" component={AddHiveScreen} options={{ title: 'Add Hive' }} />
       <Stack.Screen name="EditHive" component={AddHiveScreen} options={{ title: 'Edit Hive' }} />
       <Stack.Screen name="HiveDetail" component={HiveDetailScreen} options={{ title: 'Hive Detail' }} />
       <Stack.Screen name="AddInspection" component={AddInspectionScreen} options={{ title: 'New Inspection' }} />
       <Stack.Screen name="AddHarvest" component={AddHarvestScreen} options={{ title: 'Record Harvest' }} />
+      <Stack.Screen name="HiveInventory" component={HiveInventoryScreen} options={{ title: 'Hive Inventory' }} />
     </Stack.Navigator>
   );
 }
 
-function DashboardStack() {
+function FloraStack() {
   return (
     <Stack.Navigator screenOptions={stackOptions}>
-      <Stack.Screen name="DashboardMain" component={DashboardScreen} options={{ title: '🐝 BeeKeeper' }} />
-      <Stack.Screen name="AddHive" component={AddHiveScreen} options={{ title: 'Add Hive' }} />
+      <Stack.Screen name="FloraMain" component={FloraScreen} options={{ title: 'Flora Calendar' }} />
     </Stack.Navigator>
   );
 }
 
-function InspectionsStack() {
+function DataStack() {
   return (
     <Stack.Navigator screenOptions={stackOptions}>
-      <Stack.Screen name="InspectionsList" component={InspectionsScreen} options={{ title: 'Inspections' }} />
+      <Stack.Screen name="DataMain" component={DataScreen} options={{ title: 'Analytics' }} />
     </Stack.Navigator>
   );
 }
 
-function HarvestsStack() {
+function InventoryStack() {
   return (
     <Stack.Navigator screenOptions={stackOptions}>
-      <Stack.Screen name="HarvestsList" component={HarvestsScreen} options={{ title: 'Harvests' }} />
+      <Stack.Screen name="InventoryMain" component={InventoryScreen} options={{ title: 'Inventory' }} />
+      <Stack.Screen name="AddInventoryItem" component={AddInventoryItemScreen} options={{ title: 'Add Item' }} />
+      <Stack.Screen name="EditInventoryItem" component={AddInventoryItemScreen} options={{ title: 'Edit Item' }} />
+      <Stack.Screen name="Financial" component={FinancialScreen} options={{ title: 'Finances' }} />
+      <Stack.Screen name="AddFinancialRecord" component={AddFinancialRecordScreen} options={{ title: 'Add Record' }} />
     </Stack.Navigator>
   );
 }
+
+const TAB_ICONS = {
+  Home: { inactive: 'sunny-outline', active: 'sunny' },
+  Apiary: { inactive: 'grid-outline', active: 'grid' },
+  Flora: { inactive: 'leaf-outline', active: 'leaf' },
+  Data: { inactive: 'bar-chart-outline', active: 'bar-chart' },
+  Inventory: { inactive: 'cube-outline', active: 'cube' },
+};
 
 export default function App() {
   return (
     <AppProvider>
-      <NavigationContainer theme={navTheme}>
-        <StatusBar style="dark" />
+      <NavigationContainer>
+        {Platform.OS !== 'web' && <StatusBar style="light" />}
         <Tab.Navigator
           screenOptions={({ route }) => ({
             headerShown: false,
@@ -89,25 +111,27 @@ export default function App() {
             tabBarStyle: {
               backgroundColor: colors.surface,
               borderTopColor: colors.border,
+              borderTopWidth: 1,
               paddingBottom: 4,
               height: 60,
             },
-            tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
+            tabBarLabelStyle: {
+              fontSize: 11,
+              fontWeight: '500',
+              marginBottom: 2,
+            },
             tabBarIcon: ({ focused, color, size }) => {
-              const icons = {
-                Dashboard: focused ? 'home' : 'home-outline',
-                Hives: focused ? 'layers' : 'layers-outline',
-                Inspections: focused ? 'clipboard' : 'clipboard-outline',
-                Harvests: focused ? 'water' : 'water-outline',
-              };
-              return <Ionicons name={icons[route.name]} size={size} color={color} />;
+              const icons = TAB_ICONS[route.name];
+              const iconName = focused ? icons.active : icons.inactive;
+              return <Ionicons name={iconName} size={size} color={color} />;
             },
           })}
         >
-          <Tab.Screen name="Dashboard" component={DashboardStack} />
-          <Tab.Screen name="Hives" component={HivesStack} />
-          <Tab.Screen name="Inspections" component={InspectionsStack} />
-          <Tab.Screen name="Harvests" component={HarvestsStack} />
+          <Tab.Screen name="Home" component={HomeStack} />
+          <Tab.Screen name="Apiary" component={ApiaryStack} />
+          <Tab.Screen name="Flora" component={FloraStack} />
+          <Tab.Screen name="Data" component={DataStack} />
+          <Tab.Screen name="Inventory" component={InventoryStack} />
         </Tab.Navigator>
       </NavigationContainer>
     </AppProvider>

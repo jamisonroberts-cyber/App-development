@@ -5,7 +5,7 @@ import { useApp } from '../context/AppContext';
 import { colors, spacing, fonts } from '../utils/theme';
 
 export default function HiveDetailScreen({ navigation, route }) {
-  const { hives, getHiveInspections, getHiveHarvests } = useApp();
+  const { hives, getHiveInspections, getHiveHarvests, getHiveInventoryCost } = useApp();
   const { hiveId } = route.params;
   const hive = hives.find(h => h.id === hiveId);
   const [tab, setTab] = useState('info');
@@ -31,7 +31,7 @@ export default function HiveDetailScreen({ navigation, route }) {
 
       {/* Tabs */}
       <View style={styles.tabs}>
-        {['info', 'inspections', 'harvests'].map(t => (
+        {['info', 'inspections', 'harvests', 'inventory'].map(t => (
           <TouchableOpacity key={t} style={[styles.tab, tab === t && styles.tabActive]} onPress={() => setTab(t)}>
             <Text style={[styles.tabText, tab === t && styles.tabTextActive]}>{t.charAt(0).toUpperCase() + t.slice(1)}</Text>
           </TouchableOpacity>
@@ -76,6 +76,18 @@ export default function HiveDetailScreen({ navigation, route }) {
                     <InspItem label="Brood" value={insp.brood || '-'} />
                     <InspItem label="Temper" value={insp.temperament || '-'} />
                   </View>
+                  {/* AI flags */}
+                  {insp.aiFlags && insp.aiFlags.length > 0 && (
+                    <View style={styles.aiFlagsCard}>
+                      <View style={styles.aiFlagsHeader}>
+                        <Ionicons name="warning-outline" size={14} color={colors.warning} style={{ marginRight: 4 }} />
+                        <Text style={styles.aiFlagsTitle}>AI Flags ({insp.aiFlags.length})</Text>
+                      </View>
+                      {insp.aiFlags.map((flag, i) => (
+                        <Text key={i} style={styles.aiFlagText}>• {flag}</Text>
+                      ))}
+                    </View>
+                  )}
                   {insp.notes ? <Text style={styles.cardNotes}>{insp.notes}</Text> : null}
                 </View>
               ))
@@ -110,6 +122,22 @@ export default function HiveDetailScreen({ navigation, route }) {
             <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddHarvest', { hiveId })}>
               <Ionicons name="add" size={20} color="#fff" />
               <Text style={styles.addButtonText}>Record Harvest</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {tab === 'inventory' && (
+          <View>
+            <View style={styles.costSummaryCard}>
+              <Text style={styles.costSummaryLabel}>Total Investment in This Hive</Text>
+              <Text style={styles.costSummaryValue}>${getHiveInventoryCost(hiveId).toFixed(2)}</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={() => navigation.navigate('HiveInventory', { hiveId, hiveName: hive.name })}
+            >
+              <Ionicons name="cube-outline" size={20} color="#fff" />
+              <Text style={styles.addButtonText}>Manage Hive Inventory</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -211,4 +239,29 @@ const styles = StyleSheet.create({
   addButtonText: { color: '#fff', fontSize: fonts.sizes.md, fontWeight: '700' },
   emptyTab: { alignItems: 'center', paddingVertical: spacing.xl, gap: spacing.sm },
   emptyTabText: { fontSize: fonts.sizes.md, color: colors.textLight },
+  aiFlagsCard: {
+    backgroundColor: '#FEF3E2',
+    borderRadius: 8,
+    padding: spacing.sm,
+    marginTop: spacing.xs,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.warning,
+  },
+  aiFlagsHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
+  aiFlagsTitle: { fontSize: 12, fontWeight: '700', color: colors.warning },
+  aiFlagText: { fontSize: 12, color: colors.text, marginBottom: 2 },
+  costSummaryCard: {
+    backgroundColor: colors.surface,
+    borderRadius: 12,
+    padding: spacing.lg,
+    alignItems: 'center',
+    marginBottom: spacing.md,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  costSummaryLabel: { fontSize: fonts.sizes.sm, color: colors.textLight, marginBottom: 6 },
+  costSummaryValue: { fontSize: fonts.sizes.xxl, fontWeight: '700', color: colors.success },
 });

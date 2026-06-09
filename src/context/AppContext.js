@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { nextRecurringDate } from '../utils/taskCategories';
 
 const AppContext = createContext();
 
@@ -11,6 +12,7 @@ export function AppProvider({ children }) {
   const [inventoryItems, setInventoryItems] = useState([]);
   const [hiveInventory, setHiveInventory] = useState([]);
   const [financialRecords, setFinancialRecords] = useState([]);
+  const [tasks, setTasks] = useState([]);
 
   useEffect(() => {
     loadData();
@@ -20,7 +22,7 @@ export function AppProvider({ children }) {
     try {
       const [
         hivesData, inspectionsData, harvestsData,
-        apiarieData, inventoryData, hiveInvData, financialData,
+        apiarieData, inventoryData, hiveInvData, financialData, tasksData,
       ] = await Promise.all([
         AsyncStorage.getItem('hives'),
         AsyncStorage.getItem('inspections'),
@@ -29,6 +31,7 @@ export function AppProvider({ children }) {
         AsyncStorage.getItem('inventoryItems'),
         AsyncStorage.getItem('hiveInventory'),
         AsyncStorage.getItem('financialRecords'),
+        AsyncStorage.getItem('tasks'),
       ]);
       if (hivesData) setHives(JSON.parse(hivesData));
       if (inspectionsData) setInspections(JSON.parse(inspectionsData));
@@ -37,6 +40,7 @@ export function AppProvider({ children }) {
       if (inventoryData) setInventoryItems(JSON.parse(inventoryData));
       if (hiveInvData) setHiveInventory(JSON.parse(hiveInvData));
       if (financialData) setFinancialRecords(JSON.parse(financialData));
+      if (tasksData) setTasks(JSON.parse(tasksData));
     } catch (e) {
       console.error('Failed to load data', e);
     }
@@ -77,6 +81,11 @@ export function AppProvider({ children }) {
   async function saveFinancialRecords(updated) {
     setFinancialRecords(updated);
     await AsyncStorage.setItem('financialRecords', JSON.stringify(updated));
+  }
+
+  async function saveTasks(updated) {
+    setTasks(updated);
+    await AsyncStorage.setItem('tasks', JSON.stringify(updated));
   }
 
   // ── Hive CRUD ─────────────────────────────────────────────────────────────
@@ -173,6 +182,48 @@ export function AppProvider({ children }) {
     saveFinancialRecords(financialRecords.filter(r => r.id !== id));
   }
 
+  // ── Task CRUD ─────────────────────────────────────────────────────────────
+
+  function addTask(task) {
+    const updated = [...tasks, {
+      ...task,
+      id: Date.now().toString(),
+      completed: false,
+      completedAt: null,
+      createdAt: new Date().toISOString(),
+    }];
+    saveTasks(updated);
+  }
+
+  function updateTask(id, data) {
+    const updated = tasks.map(t => (t.id === id ? { ...t, ...data } : t));
+    saveTasks(updated);
+  }
+
+  function deleteTask(id) {
+    saveTasks(tasks.filter(t => t.id !== id));
+  }
+
+  function toggleTask(id) {
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+    if (!task.completed && task.recurring && task.recurring !== 'none') {
+      // Advance due date to next occurrence instead of completing
+      const nextDue = nextRecurringDate(task.dueDate, task.recurring);
+      const updated = tasks.map(t =>
+        t.id === id ? { ...t, dueDate: nextDue, completedAt: new Date().toISOString() } : t,
+      );
+      saveTasks(updated);
+    } else {
+      const updated = tasks.map(t =>
+        t.id === id
+          ? { ...t, completed: !t.completed, completedAt: !t.completed ? new Date().toISOString() : null }
+          : t,
+      );
+      saveTasks(updated);
+    }
+  }
+
   // ── Selector / query functions ────────────────────────────────────────────
 
   function getHiveInspections(hiveId) {
@@ -238,6 +289,7 @@ export function AppProvider({ children }) {
       // State
       hives, inspections, harvests,
       apiaries, inventoryItems, hiveInventory, financialRecords,
+      tasks,
       // Hive
       addHive, updateHive, deleteHive,
       // Apiary
@@ -251,6 +303,8 @@ export function AppProvider({ children }) {
       addHiveInventoryRecord, removeHiveInventoryRecord,
       // Financial
       addFinancialRecord, deleteFinancialRecord,
+      // Tasks
+      addTask, updateTask, deleteTask, toggleTask,
       // Selectors
       getHiveInspections, getHiveHarvests,
       getApiaryHives, getUnassignedHives,

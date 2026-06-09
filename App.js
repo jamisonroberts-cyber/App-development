@@ -26,6 +26,8 @@ import InventoryScreen from './src/screens/InventoryScreen';
 import AddInventoryItemScreen from './src/screens/AddInventoryItemScreen';
 import FinancialScreen from './src/screens/FinancialScreen';
 import AddFinancialRecordScreen from './src/screens/AddFinancialRecordScreen';
+import TasksScreen from './src/screens/TasksScreen';
+import AddTaskScreen from './src/screens/AddTaskScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -90,12 +92,33 @@ function InventoryStack() {
   );
 }
 
+const tasksStackOptions = {
+  headerStyle: { backgroundColor: '#4A7C3F' },
+  headerTintColor: '#fff',
+  headerTitleStyle: { fontWeight: '600', fontSize: fonts.sizes.lg },
+  headerBackTitleVisible: false,
+};
+
+function TasksStack() {
+  return (
+    <Stack.Navigator screenOptions={tasksStackOptions}>
+      <Stack.Screen name="TasksMain" component={TasksScreen} options={{ title: 'Homestead Tasks' }} />
+      <Stack.Screen
+        name="AddTask"
+        component={AddTaskScreen}
+        options={({ route }) => ({ title: route.params?.task ? 'Edit Task' : 'New Task' })}
+      />
+    </Stack.Navigator>
+  );
+}
+
 const TAB_ICONS = {
   Home: { inactive: 'sunny-outline', active: 'sunny' },
   Apiary: { inactive: 'grid-outline', active: 'grid' },
   Flora: { inactive: 'leaf-outline', active: 'leaf' },
   Data: { inactive: 'bar-chart-outline', active: 'bar-chart' },
   Inventory: { inactive: 'cube-outline', active: 'cube' },
+  Tasks: { inactive: 'checkmark-circle-outline', active: 'checkmark-circle' },
 };
 
 export default function App() {
@@ -132,6 +155,13 @@ export default function App() {
           <Tab.Screen name="Flora" component={FloraStack} />
           <Tab.Screen name="Data" component={DataStack} />
           <Tab.Screen name="Inventory" component={InventoryStack} />
+          <Tab.Screen
+            name="Tasks"
+            component={TasksStack}
+            options={{
+              tabBarActiveTintColor: '#4A7C3F',
+            }}
+          />
         </Tab.Navigator>
       </NavigationContainer>
     </AppProvider>
